@@ -9,6 +9,7 @@ public class RLContext : DbContext
     public DbSet<PlanProcedure> PlanProcedures { get; set; }
     public DbSet<Procedure> Procedures { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<PlanProcedureUserAssignment> PlanProcedureUserAssignments { get; set; }
 
     public RLContext() { }
     public RLContext(DbContextOptions<RLContext> options) : base(options) { }
@@ -66,6 +67,10 @@ public class RLContext : DbContext
                 }
             });
         });
+    
+    builder.Entity<PlanProcedureUserAssignment>()
+    .HasIndex(x => new { x.PlanId, x.ProcedureId, x.UserId })
+    .IsUnique();
     }
 
 

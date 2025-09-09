@@ -65,3 +65,73 @@ export const getUsers = async () => {
 
     return await response.json();
 };
+export const assignUser = async ({ planId, procedureId, userId }) => {
+  try {
+    const response = await fetch(`/api/assignments/assign`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ planId, procedureId, userId }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to assign user');
+    }
+
+    return true;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+export const removeUser = async ({ planId, procedureId, userId }) => {
+  try {
+    const response = await fetch(`/api/assignments/remove`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ planId, procedureId, userId }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to remove user');
+    }
+
+    return true;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+export const clearUsers = async ({ planId, procedureId }) => {
+  try {
+    const response = await fetch(`/api/assignments/clear`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ planId, procedureId }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to clear users');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+export const getPlanAssignments = async (planId) => {
+    const url = `${api_url}/api/assignments/${planId}`;
+    const response = await fetch(url, {
+        method: "GET",
+    });
+
+    if (!response.ok) throw new Error("Failed to get plan procedures");
+
+    return await response.json();
+};

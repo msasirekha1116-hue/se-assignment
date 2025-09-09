@@ -5,50 +5,54 @@ import {
   getPlanProcedures,
   getProcedures,
   getUsers,
+  getPlanAssignments, 
 } from "../../api/api";
-import Layout from '../Layout/Layout';
+
+import Layout from "../Layout/Layout";
 import ProcedureItem from "./ProcedureItem/ProcedureItem";
 import PlanProcedureItem from "./PlanProcedureItem/PlanProcedureItem";
 
 const Plan = () => {
-  let { id } = useParams();
+  const { id } = useParams();
   const [procedures, setProcedures] = useState([]);
   const [planProcedures, setPlanProcedures] = useState([]);
   const [users, setUsers] = useState([]);
+  const [assignments, setAssignments] = useState([]); 
 
   useEffect(() => {
     (async () => {
-      var procedures = await getProcedures();
-      var planProcedures = await getPlanProcedures(id);
-      var users = await getUsers();
+      const [procedures, planProcedures, users, assignments] = await Promise.all([
+        getProcedures(),
+        getPlanProcedures(id),
+        getUsers(),
+        getPlanAssignments(id)
+      ]);
 
-      var userOptions = [];
-      users.map((u) => userOptions.push({ label: u.name, value: u.userId }));
+      const userOptions = users.map((u) => ({ label: u.name, value: u.userId }));
 
       setUsers(userOptions);
       setProcedures(procedures);
       setPlanProcedures(planProcedures);
+      setAssignments(assignments); 
     })();
   }, [id]);
 
   const handleAddProcedureToPlan = async (procedure) => {
-    const hasProcedureInPlan = planProcedures.some((p) => p.procedureId === procedure.procedureId);
-    if (hasProcedureInPlan) return;
+    const exists = planProcedures.some((p) => p.procedureId === procedure.procedureId);
+    if (exists) return;
 
     await addProcedureToPlan(id, procedure.procedureId);
-    setPlanProcedures((prevState) => {
-      return [
-        ...prevState,
-        {
-          planId: id,
+    setPlanProcedures((prev) => [
+      ...prev,
+      {
+        planId: id,
+        procedureId: procedure.procedureId,
+        procedure: {
           procedureId: procedure.procedureId,
-          procedure: {
-            procedureId: procedure.procedureId,
-            procedureTitle: procedure.procedureTitle,
-          },
+          procedureTitle: procedure.procedureTitle,
         },
-      ];
-    });
+      },
+    ]);
   };
 
   return (
@@ -79,13 +83,21 @@ const Plan = () => {
                   <div className="col">
                     <h4>Added to Plan</h4>
                     <div>
-                      {planProcedures.map((p) => (
-                        <PlanProcedureItem
-                          key={p.procedure.procedureId}
-                          procedure={p.procedure}
-                          users={users}
-                        />
-                      ))}
+                      {planProcedures.map((p) => {
+                        const assignedUserIds = assignments
+                          .filter((a) => a.procedureId === p.procedure.procedureId)
+                          .map((a) => a.userId);
+
+                        return (
+                          <PlanProcedureItem
+                            key={p.procedure.procedureId}
+                            procedure={p.procedure}
+                            users={users}
+                            assignedUserIds={assignedUserIds} 
+                            planId={id} 
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                 </div>

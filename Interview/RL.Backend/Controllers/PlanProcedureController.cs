@@ -17,7 +17,7 @@ public class PlanProcedureController : ControllerBase
         _logger = logger;
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
-
+                
     [HttpGet]
     [EnableQuery]
     public IEnumerable<PlanProcedure> Get()
