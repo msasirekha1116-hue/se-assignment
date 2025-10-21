@@ -118,8 +118,7 @@ export const clearUsers = async ({ planId, procedureId }) => {
     if (!response.ok) {
       throw new Error('Failed to clear users');
     }
-
-    return await response.json();
+    return true;
   } catch (error) {
     console.error(error);
     throw error;

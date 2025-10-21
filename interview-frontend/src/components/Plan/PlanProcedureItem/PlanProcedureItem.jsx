@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ReactSelect from "react-select";
-import { assignUser, removeUser } from "../../../api/api";
+import { assignUser, removeUser, clearUsers } from "../../../api/api";
 
 const PlanProcedureItem = ({ procedure, users, assignedUserIds = [], planId }) => {
   const [selectedUsers, setSelectedUsers] = useState([]);
@@ -16,6 +16,18 @@ const PlanProcedureItem = ({ procedure, users, assignedUserIds = [], planId }) =
     const oldUserIds = selectedUsers.map((u) => u.value);
 
     const toAdd = newUserIds.filter((id) => !oldUserIds.includes(id));
+
+    // If the user is unselecting all users, we can use the clearUsers endpoint
+    if (newUserIds.length === 0 && oldUserIds.length > 0) {
+      try {
+        await clearUsers({ planId: parseInt(planId), procedureId: procedure.procedureId });
+        setSelectedUsers([]);
+      } catch (err) {
+        alert("Failed to clear users");
+      }
+      return;
+    }
+
     const toRemove = oldUserIds.filter((id) => !newUserIds.includes(id));
 
     try {
@@ -36,9 +48,9 @@ const PlanProcedureItem = ({ procedure, users, assignedUserIds = [], planId }) =
 
   return (
     <div className="py-2">
-            <div>
-                {procedure.procedureTitle}
-            </div>
+        <div>
+            {procedure.procedureTitle}      
+      </div>
 
       <ReactSelect
         className="mt-2"
